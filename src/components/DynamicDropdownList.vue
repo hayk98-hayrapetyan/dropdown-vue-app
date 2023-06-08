@@ -74,9 +74,7 @@ const handleAdd = () => {
 </script>
 
 <template>
-  <v-container class="pa-8">
     <v-card width="600" class="mx-auto pa-8">
-      <h2 class="text-center mb-8">Drop down vue app</h2>
       <draggable
         v-model="dropdowns"
         v-bind="dragOptions"
@@ -98,5 +96,4 @@ const handleAdd = () => {
         Add
       </v-btn>
     </v-card>
-  </v-container>
 </template>
