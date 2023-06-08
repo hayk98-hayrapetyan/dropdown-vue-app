@@ -5,5 +5,5 @@ export interface DropDownOption {
 
 export interface DropDown {
     id: string;
-    value: string;
+    value: DropDownOption;
 }

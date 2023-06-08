@@ -5,7 +5,7 @@ import { computed } from 'vue';
 const props = defineProps<{
     options: Array<DropDownOption[]>,
     id: string,
-    modelValue: string,
+    modelValue: DropDownOption,
     disableDelete: boolean
 }>()
 
@@ -18,10 +18,10 @@ const model = computed({
     get(){
         return props.modelValue
     },
-    set(value: string){
-        console.log(value);
-        
-        emit('update:modelValue', { id: props.id, value })
+    set(value: DropDownOption){
+        if(value){
+            emit('update:modelValue', { id: props.id, value })
+        }
     }
 })
 
@@ -31,28 +31,39 @@ const handleRemove = () => {
 </script>
 
 <template>
-  <div class="d-flex align-items-center">
+  <div class="app-drop-down d-flex align-center">
+    <v-icon class="app-drop-down__draggable mr-4" size="large">mdi-drag</v-icon>
     <v-autocomplete
         :items="options"
-        item-select="key"
         item-value="key"
         item-title="value"
         variant="outlined"
         v-model="model"
+        hide-details
+        persistent-hint
+        return-object
+        class="w-full"
     ></v-autocomplete>
     <v-btn
-        density="comfortable"
         variant="plain"
+        class="px-0"
+        density="compact"
         :disabled="disableDelete"
         @click="handleRemove"
     >
-        <template v-slot:append>
-            <v-icon color="success">mdi-account</v-icon>
-        </template>
+        <v-icon color="red">mdi-close</v-icon>
     </v-btn>
   </div>
 </template>
 
 <style scoped>
-
+.app-drop-down__draggable {
+    cursor: grab;
+    visibility: hidden;
+    pointer-events: none;
+}
+.app-drop-down:hover .app-drop-down__draggable {
+    visibility: visible;
+    pointer-events: all;
+}
 </style>

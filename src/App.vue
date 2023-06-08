@@ -2,6 +2,7 @@
 import AppDropDown from '@/components/AppDropDown';
 import { computed, ref } from 'vue';
 import type { DropDown, DropDownOption } from './types';
+import draggable from "vuedraggable";
 
 const MINIMUM_VALUE = 3;
 const MAXIMUM_VALUE = 8;
@@ -42,9 +43,15 @@ const options = ref<DropDownOption[]>([
 const selectedOptions = ref<string[]>(initDefaultSelection((_: undefined, idx: number): string => options.value[idx].key))
 
 const dropdowns = ref(initDefaultSelection((_: undefined, idx: number): DropDown  => ({
-  value: options.value[idx].key, 
+  value: options.value[idx], 
   id: generateRandomId(),
 })))
+
+const dragOptions = ref({
+  animation: 200,
+  handle: ".app-drop-down__draggable",
+  itemKey: 'option'
+})
 
 const filteredOptions = computed((): DropDownOption[] => {
   return options.value.filter(option => !selectedOptions.value.includes(option.key))
@@ -62,14 +69,14 @@ const handleValueChange = (dropdown: DropDown) => {
   const currentDropDown = dropdowns.value.find(({ id }) => dropdown.id === id)
 
   if(currentDropDown){
-    removeSelectedKey(currentDropDown.value)
-    selectedOptions.value.push(dropdown.value)
+    removeSelectedKey(currentDropDown.value.key)
+    selectedOptions.value.push(dropdown.value.key)
     currentDropDown.value = dropdown.value
   }
 }
 
 const handleRemove = (dropdown: DropDown) => {
-  removeSelectedKey(dropdown.value)
+  removeSelectedKey(dropdown.value.key)
   dropdowns.value = dropdowns.value.filter(({ id }) => id !== dropdown.id)
 }
 
@@ -79,7 +86,7 @@ const removeSelectedKey = (removedKey: string) => {
 
 const handleAdd = () => {
   dropdowns.value.push({
-  value: '', 
+  value: { value: '', key: '' } as DropDownOption, 
   id: generateRandomId(),
 })
 }
@@ -88,26 +95,27 @@ const handleAdd = () => {
 <template>
   <v-container class="pa-8">
     <v-card width="600" class="mx-auto pa-8">
-      <AppDropDown 
-        v-for="dropdown in dropdowns" 
-        :key="dropdown.id"  
-        :id="dropdown.id"  
-        :model-value="dropdown.value"
-        :disable-delete="isDeleteDisabled"
-        @update:modelValue="handleValueChange"
-        @delete="handleRemove"
-        :options="filteredOptions"
-      />
-      <v-btn @click="handleAdd" :disabled="isAddDisabled" prepend-icon="mdi-plus" variant="tonal">
-        <template v-slot:prepend>
-          <v-icon color="success"></v-icon>
+      <h2 class="text-center mb-8">Drop down vue app</h2>
+      <draggable
+        v-model="dropdowns"
+        v-bind="dragOptions"
+      >
+        <template #item="{ element }">
+          <AppDropDown 
+            :id="element.id"  
+            :model-value="element.value"
+            :disable-delete="isDeleteDisabled"
+            @update:modelValue="handleValueChange"
+            @delete="handleRemove"
+            :options="filteredOptions"
+            class="mb-4"
+          />
         </template>
+      </draggable>
+      
+      <v-btn @click="handleAdd" :disabled="isAddDisabled" prepend-icon="mdi-plus" variant="tonal">
         Add
       </v-btn>
     </v-card>
   </v-container>
 </template>
-
-<style scoped>
-
-</style>

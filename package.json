@@ -12,8 +12,9 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "material-design-icons-iconfont": "^6.7.0",
+    "@mdi/font": "^7.2.96",
     "vue": "^3.3.2",
+    "vuedraggable": "^4.1.0",
     "vuetify": "^3.3.3"
   },
   "devDependencies": {
