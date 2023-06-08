@@ -12,5 +12,6 @@ const vuetify = createVuetify({
   components,
   directives,
 })
+import 'material-design-icons-iconfont/dist/material-design-icons.css'
 
 createApp(App).use(vuetify).mount('#app')

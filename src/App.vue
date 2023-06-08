@@ -1,25 +1,111 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import AppDropDown from '@/components/AppDropDown';
+import { computed, ref } from 'vue';
+import type { DropDown, DropDownOption } from './types';
+
+const MINIMUM_VALUE = 3;
+const MAXIMUM_VALUE = 8;
 
 const generateRandomId = () => crypto.randomUUID()
 
-const dropdowns = reactive([
-  { 
-    value: '', 
-    id: generateRandomId, 
-    options: [
-      { key: "Option 1", value: "Value 1" },
-      { key: "Option 2", value: "Value 2" },
-      { key: "Option 3", value: "Value 3" }
-    ] 
-  }
+const initDefaultSelection = <T>(
+  callback: (_: undefined, idx: number) => T
+): T[] => {
+  return Array(5)
+    .fill(undefined)
+    .map(callback);
+};
+
+const options = ref<DropDownOption[]>([
+  { key: "name", value: "Name" },
+  { key: "age", value: "Age" },
+  { key: "location", value: "Location" },
+  { key: "occupation", value: "Occupation" },
+  { key: "hobbies", value: "Hobbies" },
+  { key: "favoriteColor", value: "Favorite Color" },
+  { key: "height", value: "Height" },
+  { key: "weight", value: "Weight" },
+  { key: "education", value: "Education" },
+  { key: "languages", value: "Languages" },
+  { key: "company", value: "Company" },
+  { key: "role", value: "Role" },
+  { key: "experience", value: "Experience" },
+  { key: "skills", value: "Skills" },
+  { key: "favoriteBook", value: "Favorite Book" },
+  { key: "favoriteFood", value: "Favorite Food" },
+  { key: "pet", value: "Pet" },
+  { key: "favoriteMovie", value: "Favorite Movie" },
+  { key: "sports", value: "Sports" },
+  { key: "zodiacSign", value: "Zodiac Sign" },
 ])
+
+const selectedOptions = ref<string[]>(initDefaultSelection((_: undefined, idx: number): string => options.value[idx].key))
+
+const dropdowns = ref(initDefaultSelection((_: undefined, idx: number): DropDown  => ({
+  value: options.value[idx].key, 
+  id: generateRandomId(),
+})))
+
+const filteredOptions = computed((): DropDownOption[] => {
+  return options.value.filter(option => !selectedOptions.value.includes(option.key))
+})
+
+const isDeleteDisabled = computed((): boolean => {
+  return dropdowns.value.length <= MINIMUM_VALUE
+})
+
+const isAddDisabled = computed((): boolean => {
+  return dropdowns.value.length >= MAXIMUM_VALUE
+})
+
+const handleValueChange = (dropdown: DropDown) => {
+  const currentDropDown = dropdowns.value.find(({ id }) => dropdown.id === id)
+
+  if(currentDropDown){
+    removeSelectedKey(currentDropDown.value)
+    selectedOptions.value.push(dropdown.value)
+    currentDropDown.value = dropdown.value
+  }
+}
+
+const handleRemove = (dropdown: DropDown) => {
+  removeSelectedKey(dropdown.value)
+  dropdowns.value = dropdowns.value.filter(({ id }) => id !== dropdown.id)
+}
+
+const removeSelectedKey = (removedKey: string) => {
+  selectedOptions.value = selectedOptions.value.filter(key => key !== removedKey)
+}
+
+const handleAdd = () => {
+  dropdowns.value.push({
+  value: '', 
+  id: generateRandomId(),
+})
+}
 </script>
 
 <template>
-  <div>
-
-  </div>
+  <v-container class="pa-8">
+    <v-card width="600" class="mx-auto pa-8">
+      <AppDropDown 
+        v-for="dropdown in dropdowns" 
+        :key="dropdown.id"  
+        :id="dropdown.id"  
+        :model-value="dropdown.value"
+        :disable-delete="isDeleteDisabled"
+        @update:modelValue="handleValueChange"
+        @delete="handleRemove"
+        :options="filteredOptions"
+      />
+      <v-btn @click="handleAdd" :disabled="isAddDisabled" prepend-icon="mdi-plus" variant="tonal">
+        <template v-slot:prepend>
+          <v-icon color="success"></v-icon>
+        </template>
+        Add
+      </v-btn>
+    </v-card>
+  </v-container>
 </template>
 
 <style scoped>
